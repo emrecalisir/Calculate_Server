@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.ws.rs.Consumes;
@@ -11,10 +13,13 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONObject;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -25,6 +30,8 @@ import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
 import org.opencv.objdetect.CascadeClassifier;
 
+import com.gsu.cloud.calculator.data.RectangleFace;
+
 @Path("/imageChanger")
 public class ImageChanger {
 
@@ -34,7 +41,7 @@ public class ImageChanger {
 	@Path("/post")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public String ImageChange(String imageContentData) {
+	public Response ImageChange(String imageContentData) {
 
 		imageContentData = imageContentData.replace("imageContentData=", "");
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -42,11 +49,14 @@ public class ImageChanger {
 		CascadeClassifier faceDetector = new CascadeClassifier(
 				"C:/opencv-2.4.9/sources/data/haarcascades/haarcascade_frontalface_alt.xml");
 
-		System.out.println(imageContentData);
+		// System.out.println(imageContentData);
 		byte[] decodeImage;
-		String stringImage = null;
 		char[] charArray;
 		byte[] decodeHex;
+		List<RectangleFace> rectangleFaceList = new ArrayList<RectangleFace>();
+		String response = "";
+		JSONObject obj = null;
+		JSONArray jsonArray = new JSONArray();
 		try {
 			charArray = imageContentData.toCharArray();
 			decodeHex = Hex.decodeHex(charArray);
@@ -56,19 +66,41 @@ public class ImageChanger {
 
 			MatOfRect faceDetections = new MatOfRect();
 			faceDetector.detectMultiScale(receivedMatImage2, faceDetections);
-
-			System.out.println(String.format("Detected %s faces",
-					faceDetections.toArray().length));
-
+			RectangleFace rectangleFace = null;
 			for (Rect rect : faceDetections.toArray()) {
-				Core.rectangle(receivedMatImage2, new Point(rect.x, rect.y),
-						new Point(rect.x + rect.width, rect.y + rect.height),
-						new Scalar(0, 255, 0));
+				rectangleFace = new RectangleFace(rect.x, rect.x
+						+ rect.width, rect.y, rect.y + rect.height);
+				rectangleFaceList.add(rectangleFace);
+				
+				obj = new JSONObject();
+				obj.put("x1", rectangleFace.getX1());
+				obj.put("x2", rectangleFace.getX2());
+				obj.put("y1", rectangleFace.getY1());
+				obj.put("y2", rectangleFace.getY2());
+				jsonArray.put(obj);
 			}
-
-			String filename = "output22.png";
-			System.out.println(String.format("Writing %s", filename));
-			Highgui.imwrite(filename, receivedMatImage2);
+			
+			/*
+			for (RectangleFace rectangleFace : rectangleFaceList) {
+				response += rectangleFace.toString();
+				obj.put("obj"+counter, rectangleFace.toString());
+			}
+			
+ 
+			 * System.out.println(String.format("Detected %s faces",
+			 * faceDetections.toArray().length)); for (Rect rect :
+			 * faceDetections.toArray()) { rectangleFaceList.add(new
+			 * RectangleFace(rect.x, rect.x+rect.width, rect.y,
+			 * rect.y+rect.height));
+			 * 
+			 * Core.rectangle(receivedMatImage2, new Point(rect.x, rect.y), new
+			 * Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0,
+			 * 255, 0)); }
+			 * 
+			 * String filename = "output22.png";
+			 * System.out.println(String.format("Writing %s", filename));
+			 * Highgui.imwrite(filename, receivedMatImage2);
+			 */
 
 		} catch (DecoderException ex) {
 			ex.printStackTrace();
@@ -77,7 +109,8 @@ public class ImageChanger {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return stringImage;
+
+		return Response.status(200).entity(jsonArray).build();
 	}
 
 	public static Mat decodeToMat(byte[] imageByte) {
