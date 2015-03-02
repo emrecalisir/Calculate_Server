@@ -24,10 +24,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.highgui.Highgui;
 import org.opencv.objdetect.CascadeClassifier;
 
 import com.gsu.cloud.calculator.data.RectangleFace;
@@ -42,6 +39,8 @@ public class ImageChanger {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response ImageChange(String imageContentData) {
+
+		Long startTime = System.currentTimeMillis() / 1000;
 
 		imageContentData = imageContentData.replace("imageContentData=", "");
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -66,6 +65,8 @@ public class ImageChanger {
 
 			MatOfRect faceDetections = new MatOfRect();
 			faceDetector.detectMultiScale(receivedMatImage2, faceDetections);
+			System.out.println(String.format("Detected %s faces", faceDetections.toArray().length)); 
+			
 			RectangleFace rectangleFace = null;
 			for (Rect rect : faceDetections.toArray()) {
 				rectangleFace = new RectangleFace(rect.x, rect.x
@@ -109,7 +110,8 @@ public class ImageChanger {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		Long endTime = System.currentTimeMillis() / 1000;
+		System.out.println("Total time of server-side processing: " + (endTime - startTime) + " seconds");
 		return Response.status(200).entity(jsonArray).build();
 	}
 
