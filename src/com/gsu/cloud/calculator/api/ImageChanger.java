@@ -121,7 +121,7 @@ public class ImageChanger {
 		try {
 			ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
 			image = ImageIO.read(bis);
-			ImageIO.write(image, "jpg", new File("c:/new-darksouls.jpg"));
+			//ImageIO.write(image, "jpg", new File("c:/new-darksouls.jpg"));
 			byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer())
 					.getData();
 			mat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
