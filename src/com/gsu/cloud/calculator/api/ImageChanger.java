@@ -1,3 +1,9 @@
+/*
+ * Author: Emre CALISIR
+ * Graduate Thesis: Mobile Cloud Computing - Performance and Efficiency Analysis on Local Cloudlets
+ * Galatasaray University Computer Science, 2015
+ */
+
 package com.gsu.cloud.calculator.api;
 
 import java.awt.image.BufferedImage;
@@ -33,6 +39,20 @@ import com.gsu.cloud.calculator.data.RectangleFace;
 public class ImageChanger {
 
 	int numberOfFacesDetected = 0;
+	boolean isInitialRequest = true;
+	CascadeClassifier faceDetector = null;
+	byte[] decodeImage;
+	char[] charArray;
+	byte[] decodeHex;
+	List<RectangleFace> rectangleFaceList = null;
+	String response = "";
+	JSONObject obj = null;
+	JSONArray jsonArray = null;
+	Mat receivedMatImage2 = null;
+	MatOfRect faceDetections = null;
+	RectangleFace rectangleFace = null;
+	Long startTime = 0L;
+	Long endTime = 0L;
 
 	@POST
 	@Path("/post")
@@ -40,39 +60,36 @@ public class ImageChanger {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response ImageChange(String imageContentData) {
 
-		Long startTime = System.currentTimeMillis() / 1000;
-
+		startTime = System.currentTimeMillis();
 		imageContentData = imageContentData.replace("imageContentData=", "");
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
-		CascadeClassifier faceDetector = new CascadeClassifier(
-				"C:/opencv-2.4.9/sources/data/haarcascades/haarcascade_frontalface_alt.xml");
+		if (isInitialRequest) {
 
-		// System.out.println(imageContentData);
-		byte[] decodeImage;
-		char[] charArray;
-		byte[] decodeHex;
-		List<RectangleFace> rectangleFaceList = new ArrayList<RectangleFace>();
-		String response = "";
-		JSONObject obj = null;
-		JSONArray jsonArray = new JSONArray();
+			System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+
+			faceDetector = new CascadeClassifier(
+					"C:/opencv-2.4.9/sources/data/haarcascades/haarcascade_frontalface_alt.xml");
+			isInitialRequest = false;
+		}
+
+		rectangleFaceList = new ArrayList<RectangleFace>();
+		jsonArray = new JSONArray();
 		try {
 			charArray = imageContentData.toCharArray();
 			decodeHex = Hex.decodeHex(charArray);
 			decodeImage = Base64.decodeBase64(decodeHex);
+			receivedMatImage2 = decodeToMat(decodeImage);
 
-			Mat receivedMatImage2 = decodeToMat(decodeImage);
-
-			MatOfRect faceDetections = new MatOfRect();
+			faceDetections = new MatOfRect();
 			faceDetector.detectMultiScale(receivedMatImage2, faceDetections);
-			System.out.println(String.format("Detected %s faces", faceDetections.toArray().length)); 
-			
-			RectangleFace rectangleFace = null;
+			System.out.println(String.format("Detected %s faces",
+					faceDetections.toArray().length));
+
 			for (Rect rect : faceDetections.toArray()) {
-				rectangleFace = new RectangleFace(rect.x, rect.x
-						+ rect.width, rect.y, rect.y + rect.height);
+				rectangleFace = new RectangleFace(rect.x, rect.x + rect.width,
+						rect.y, rect.y + rect.height);
 				rectangleFaceList.add(rectangleFace);
-				
+
 				obj = new JSONObject();
 				obj.put("x1", rectangleFace.getX1());
 				obj.put("x2", rectangleFace.getX2());
@@ -80,38 +97,16 @@ public class ImageChanger {
 				obj.put("y2", rectangleFace.getY2());
 				jsonArray.put(obj);
 			}
-			
-			/*
-			for (RectangleFace rectangleFace : rectangleFaceList) {
-				response += rectangleFace.toString();
-				obj.put("obj"+counter, rectangleFace.toString());
-			}
-			
- 
-			 * System.out.println(String.format("Detected %s faces",
-			 * faceDetections.toArray().length)); for (Rect rect :
-			 * faceDetections.toArray()) { rectangleFaceList.add(new
-			 * RectangleFace(rect.x, rect.x+rect.width, rect.y,
-			 * rect.y+rect.height));
-			 * 
-			 * Core.rectangle(receivedMatImage2, new Point(rect.x, rect.y), new
-			 * Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0,
-			 * 255, 0)); }
-			 * 
-			 * String filename = "output22.png";
-			 * System.out.println(String.format("Writing %s", filename));
-			 * Highgui.imwrite(filename, receivedMatImage2);
-			 */
 
-		} catch (DecoderException ex) {
-			ex.printStackTrace();
+		} catch (DecoderException e) {
+			System.out.println(e);
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e);
 		}
-		Long endTime = System.currentTimeMillis() / 1000;
-		System.out.println("Total time of server-side processing: " + (endTime - startTime) + " seconds");
+		endTime = System.currentTimeMillis();
+		System.out.println("Total time of server-side processing: "
+				+ (endTime - startTime) + " milliseconds");
 		return Response.status(200).entity(jsonArray).build();
 	}
 
@@ -121,7 +116,6 @@ public class ImageChanger {
 		try {
 			ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
 			image = ImageIO.read(bis);
-			//ImageIO.write(image, "jpg", new File("c:/new-darksouls.jpg"));
 			byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer())
 					.getData();
 			mat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
@@ -132,36 +126,5 @@ public class ImageChanger {
 		}
 		return mat;
 
-	}
-
-	public static String encodeImage(byte[] imageByteArray) {
-		return new String(Base64.encodeBase64(imageByteArray));
-	}
-
-	public String encodeMatToString(Mat imageToEncode) {
-
-		String image_str = null;
-		// ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		try {
-
-			byte[] data = new byte[imageToEncode.rows() * imageToEncode.cols()
-					* (int) (imageToEncode.elemSize())];
-
-			image_str = encodeImage(data);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return image_str;
-	}
-
-	public static byte[] hexStringToByteArray(String s) {
-		int len = s.length();
-		byte[] data = new byte[len / 2];
-		for (int i = 0; i < len; i += 2) {
-			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character
-					.digit(s.charAt(i + 1), 16));
-		}
-		return data;
 	}
 }
