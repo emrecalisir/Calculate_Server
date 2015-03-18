@@ -51,8 +51,7 @@ public class ImageChanger {
 	Mat receivedMatImage2 = null;
 	MatOfRect faceDetections = null;
 	RectangleFace rectangleFace = null;
-	Long startTime = 0L;
-	Long endTime = 0L;
+	Long bStartTime, bEndTime = 0L;
 
 	@POST
 	@Path("/post")
@@ -60,9 +59,8 @@ public class ImageChanger {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response ImageChange(String imageContentData) {
 
-		startTime = System.currentTimeMillis();
+		bStartTime = System.currentTimeMillis();
 		imageContentData = imageContentData.replace("imageContentData=", "");
-
 		if (isInitialRequest) {
 
 			System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -78,13 +76,21 @@ public class ImageChanger {
 			charArray = imageContentData.toCharArray();
 			decodeHex = Hex.decodeHex(charArray);
 			decodeImage = Base64.decodeBase64(decodeHex);
+			/*
+			 * BufferedImage image=ImageIO.read(new
+			 * ByteArrayInputStream(decodeImage));
+			 * System.out.println("initial size height: " + image.getHeight() +
+			 * " width: " + image.getWidth());
+			 */
 			receivedMatImage2 = decodeToMat(decodeImage);
 
 			faceDetections = new MatOfRect();
 			faceDetector.detectMultiScale(receivedMatImage2, faceDetections);
-			System.out.println(String.format("Detected %s faces",
-					faceDetections.toArray().length));
-
+			/*
+			 * System.out.println(String.format("Detected %s faces",
+			 * faceDetections.toArray().length));
+			 */
+			numberOfFacesDetected = faceDetections.toArray().length;
 			for (Rect rect : faceDetections.toArray()) {
 				rectangleFace = new RectangleFace(rect.x, rect.x + rect.width,
 						rect.y, rect.y + rect.height);
@@ -104,9 +110,11 @@ public class ImageChanger {
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-		endTime = System.currentTimeMillis();
-		System.out.println("Total time of server-side processing: "
-				+ (endTime - startTime) + " milliseconds");
+		bEndTime = System.currentTimeMillis();
+		System.out.println("Number of faces: "
+				+ numberOfFacesDetected + ". Time lasted: [(" + bStartTime
+				/ 1000 + "," + bEndTime / 1000 + ")="
+				+ ((bEndTime) - (bStartTime))+" ms ]");
 		return Response.status(200).entity(jsonArray).build();
 	}
 
