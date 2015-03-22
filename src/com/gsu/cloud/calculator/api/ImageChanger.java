@@ -60,6 +60,7 @@ public class ImageChanger {
 	public Response ImageChange(String imageContentData) {
 
 		bStartTime = System.currentTimeMillis();
+		System.out.println("bStartTime: " + bStartTime);
 		imageContentData = imageContentData.replace("imageContentData=", "");
 		if (isInitialRequest) {
 
@@ -91,18 +92,31 @@ public class ImageChanger {
 			 * faceDetections.toArray().length));
 			 */
 			numberOfFacesDetected = faceDetections.toArray().length;
+
 			for (Rect rect : faceDetections.toArray()) {
-				rectangleFace = new RectangleFace(rect.x, rect.x + rect.width,
-						rect.y, rect.y + rect.height);
-				rectangleFaceList.add(rectangleFace);
 
 				obj = new JSONObject();
-				obj.put("x1", rectangleFace.getX1());
-				obj.put("x2", rectangleFace.getX2());
-				obj.put("y1", rectangleFace.getY1());
-				obj.put("y2", rectangleFace.getY2());
+				obj.put("x1", rect.x);
+				obj.put("x2", rect.x + rect.width);
+				obj.put("y1", rect.y);
+				obj.put("y2", rect.y + rect.height);
 				jsonArray.put(obj);
+
+				/*
+				 * rectangleFace = new RectangleFace(rect.x, rect.x +
+				 * rect.width, rect.y, rect.y + rect.height);
+				 * rectangleFaceList.add(rectangleFace);
+				 * 
+				 * obj = new JSONObject(); obj.put("x1", rectangleFace.getX1());
+				 * obj.put("x2", rectangleFace.getX2()); obj.put("y1",
+				 * rectangleFace.getY1()); obj.put("y2", rectangleFace.getY2());
+				 * jsonArray.put(obj);
+				 */
 			}
+			bEndTime = System.currentTimeMillis();
+			obj = new JSONObject();
+			obj.put("serverTimeLasted", (bEndTime - bStartTime));
+			jsonArray.put(obj);
 
 		} catch (DecoderException e) {
 			System.out.println(e);
@@ -110,11 +124,16 @@ public class ImageChanger {
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-		bEndTime = System.currentTimeMillis();
-		System.out.println("Number of faces: "
-				+ numberOfFacesDetected + ". Time lasted: [(" + bStartTime
-				/ 1000 + "," + bEndTime / 1000 + ")="
-				+ ((bEndTime) - (bStartTime))+" ms ]");
+
+		System.out.println("Number of faces: " + (bEndTime - bStartTime)
+				+ " ms");
+
+		/*
+		 * System.out.println("Number of faces: " + numberOfFacesDetected +
+		 * ". Time lasted: [(" + bStartTime / 1000 + "," + bEndTime / 1000 +
+		 * ")=" + ((bEndTime) - (bStartTime))+" ms ]");
+		 */
+		System.out.println("bEndTime: " + bEndTime);
 		return Response.status(200).entity(jsonArray).build();
 	}
 
