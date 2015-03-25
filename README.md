@@ -1,3 +1,4 @@
+ ## EMRE CALISIR ## emrecalisir@gmail.com ## GALATASARAY UNIVERSITY COMPUTER SCIENCE M.SC. #
  
 Calculate_Server is a project which responds to the computation requests sent by Android client application ClientGsu. Currently, the communication is established with JAVA Rest APIs and JAVA RMI. 
 
