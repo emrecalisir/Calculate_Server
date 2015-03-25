@@ -125,15 +125,8 @@ public class ImageChanger {
 			System.out.println(e);
 		}
 
-		System.out.println("Number of faces: " + (bEndTime - bStartTime)
+		System.out.println("Number of faces: " + numberOfFacesDetected +  " in " + (bEndTime - bStartTime)
 				+ " ms");
-
-		/*
-		 * System.out.println("Number of faces: " + numberOfFacesDetected +
-		 * ". Time lasted: [(" + bStartTime / 1000 + "," + bEndTime / 1000 +
-		 * ")=" + ((bEndTime) - (bStartTime))+" ms ]");
-		 */
-		System.out.println("bEndTime: " + bEndTime);
 		return Response.status(200).entity(jsonArray).build();
 	}
 
