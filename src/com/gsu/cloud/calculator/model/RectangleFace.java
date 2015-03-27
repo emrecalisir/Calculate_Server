@@ -1,7 +1,11 @@
-package com.gsu.cloud.calculator.data;
+package com.gsu.cloud.calculator.model;
 
-public class RectangleFace {
+public class RectangleFace implements java.io.Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7716864414191428475L;
 	private int x1;
 	private int x2;
 	private int y1;
