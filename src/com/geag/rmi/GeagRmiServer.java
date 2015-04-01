@@ -50,20 +50,40 @@ public class GeagRmiServer implements GeagRmiInterface, java.io.Serializable {
 
 	@Override
 	public String getResponse(String data) {
-		System.out.println("getResponse called and data:" + data);
-		List<RectangleFace> listOfFaces = new ArrayList<RectangleFace>();
-		GeagFaceDetector geagFaceDetector = new GeagFaceDetector();
-		MatOfRect faceDetections = geagFaceDetector.detectFaces(data);
+		Long bStartTime= 0L, bEndTime = 0L;
 
-		int numberOfFacesDetected = faceDetections.toArray().length;
-		System.out
-				.println("number of faces detected: " + numberOfFacesDetected);
+		bStartTime = System.currentTimeMillis();
+		System.out.println("bStartTime: " + bStartTime);
+
+		List<RectangleFace> listOfFaces = null;
+		GeagFaceDetector geagFaceDetector = null;
+		MatOfRect faceDetections = null;
+		int numberOfFacesDetected = 0;
 		String result = "";
-		RectangleFace rectangleFace = null;
-		for (Rect rect : faceDetections.toArray()) {
-			result += rect.x + "," + (rect.x + rect.width) + "," + rect.y + ","
-					+ (rect.y + rect.height);
-			result += ";";
+
+		try {
+			System.out.println("getResponse called");
+			listOfFaces = new ArrayList<RectangleFace>();
+			geagFaceDetector = new GeagFaceDetector();
+			faceDetections = geagFaceDetector.detectFaces(data);
+
+			numberOfFacesDetected = faceDetections.toArray().length;
+			System.out.println("number of faces detected: "
+					+ numberOfFacesDetected);
+
+			for (Rect rect : faceDetections.toArray()) {
+				result += rect.x + "," + (rect.x + rect.width) + "," + rect.y
+						+ "," + (rect.y + rect.height);
+				result += ";";
+			}
+
+			bEndTime = System.currentTimeMillis();
+			result += (bEndTime - bStartTime);
+
+			System.out.println("Number of faces: " + numberOfFacesDetected
+					+ " in " + (bEndTime - bStartTime) + " ms");
+		} catch (Exception ex) {
+			System.out.println(ex);
 		}
 		return result;
 
