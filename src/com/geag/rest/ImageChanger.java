@@ -70,6 +70,7 @@ public class ImageChanger {
 			}
 
 			obj = new JSONObject();
+			bEndTime = System.currentTimeMillis();
 			obj.put("serverTimeLasted", (bEndTime - bStartTime));
 			jsonArray.put(obj);
 
@@ -77,7 +78,6 @@ public class ImageChanger {
 			e.printStackTrace();
 		}
 
-		bEndTime = System.currentTimeMillis();
 		System.out.println("Number of faces: " + numberOfFacesDetected + " in "
 				+ (bEndTime - bStartTime) + " ms");
 

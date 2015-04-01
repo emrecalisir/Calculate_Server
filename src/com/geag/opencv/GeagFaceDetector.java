@@ -39,13 +39,17 @@ public class GeagFaceDetector {
 			charArray = imageContentData.toCharArray();
 			decodeHex = Hex.decodeHex(charArray);
 			decodeImage = Base64.decodeBase64(decodeHex);
+			//decodeImage = Base64.decodeBase64(imageContentData.getBytes());
+			
 			receivedMatImage2 = decodeToMat(decodeImage);
 			faceDetections = new MatOfRect();
 			faceDetector.detectMultiScale(receivedMatImage2, faceDetections);
 
-		} catch (DecoderException e) {
+		} 
+		/*catch (DecoderException e) {
 			System.out.println(e);
-		} catch (Exception e) {
+		}
+		*/ catch (Exception e) {
 			System.out.println(e);
 		}
 		return faceDetections;
