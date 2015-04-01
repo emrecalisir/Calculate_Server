@@ -9,10 +9,10 @@ public class GeagMatrixMultiplication {
 		Long eStartTime, eEndTime = 0L;
 		eStartTime = System.currentTimeMillis();
 
-		int[][] a = new int[5000][5000];
-		int[][] b = new int[5000][5000];
-		for (int i = 0; i < 5000; i++) {
-			for (int j = 0; j < 5000; j++) {
+		int[][] a = new int[1000][1000];
+		int[][] b = new int[1000][1000];
+		for (int i = 0; i < 1000; i++) {
+			for (int j = 0; j < 1000; j++) {
 				a[i][j] = 2;
 				b[i][j] = 4;
 			}
