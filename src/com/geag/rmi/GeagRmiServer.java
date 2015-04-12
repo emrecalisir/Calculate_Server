@@ -6,6 +6,9 @@ import java.util.List;
 
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
+import org.scilab.modules.javasci.Scilab;
+import org.scilab.modules.types.ScilabDouble;
+import org.scilab.modules.types.ScilabType;
 
 import com.geag.opencv.GeagFaceDetector;
 import com.gsu.cloud.calculator.model.RectangleFace;
@@ -23,10 +26,11 @@ public class GeagRmiServer implements GeagRmiInterface, java.io.Serializable {
 
 	public GeagRmiServer() {
 		try {
+			
 			CallHandler callHandler = new CallHandler();
 			callHandler.registerGlobal(GeagRmiInterface.class, this);
 			Server server = new Server();
-			server.bind(7777, callHandler);
+			server.bind(7779, callHandler);
 			server.addServerListener(new IServerListener() {
 
 				@Override
@@ -50,7 +54,7 @@ public class GeagRmiServer implements GeagRmiInterface, java.io.Serializable {
 
 	@Override
 	public String getResponse(String data) {
-		Long bStartTime= 0L, bEndTime = 0L;
+		Long bStartTime = 0L, bEndTime = 0L;
 
 		bStartTime = System.currentTimeMillis();
 		System.out.println("bStartTime: " + bStartTime);
@@ -88,4 +92,42 @@ public class GeagRmiServer implements GeagRmiInterface, java.io.Serializable {
 		return result;
 
 	}
+
+	@Override
+	public String getResponseOfScientificOperation(String data) {
+		Long bStartTime = 0L, bEndTime = 0L;
+		try {		
+			
+
+			bStartTime = System.currentTimeMillis();
+			System.out.println("bStartTime: " + bStartTime);
+
+			Scilab sci = new Scilab();
+
+			if (sci.open()) {
+				/* Send a Scilab instruction */
+				sci.exec("K1=int(rand(2000,2000)*10);");
+				sci.exec("K2=int(rand(2000,2000)*10);");
+				sci.exec("inv(inv(inv(inv(inv(inv(inv(inv(inv(inv(K1*K2))))))))));");
+
+
+				sci.close();
+			} else {
+				System.out.println("Could not start Scilab ");
+			}
+
+			/*
+			 * Can be improved by other exceptions: AlreadyRunningException,
+			 * InitializationException, UndefinedVariableException,
+			 * UnknownTypeException, etc
+			 */
+		} catch (org.scilab.modules.javasci.JavasciException e) {
+			System.err.println("An exception occurred: "
+					+ e.getLocalizedMessage());
+		}
+		bEndTime = System.currentTimeMillis();
+		System.out.println((bEndTime - bStartTime) + " ms");
+		return "ss";
+	}
+
 }
