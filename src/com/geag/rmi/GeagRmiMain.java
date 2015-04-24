@@ -9,7 +9,9 @@ public class GeagRmiMain {
 
 		System.out.println(System.getProperty("java.library.path"));
 
+		
 		GeagRmiServer geagRmiServer = new GeagRmiServer();
+		
 
 	}
 }

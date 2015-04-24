@@ -10,7 +10,9 @@ import org.scilab.modules.javasci.Scilab;
 import org.scilab.modules.types.ScilabDouble;
 import org.scilab.modules.types.ScilabType;
 
+import com.geag.jscience.JScienceCalculation;
 import com.geag.opencv.GeagFaceDetector;
+import com.geag.util.Util;
 import com.gsu.cloud.calculator.model.RectangleFace;
 
 import lipermi.handler.CallHandler;
@@ -26,11 +28,11 @@ public class GeagRmiServer implements GeagRmiInterface, java.io.Serializable {
 
 	public GeagRmiServer() {
 		try {
-			
+
 			CallHandler callHandler = new CallHandler();
 			callHandler.registerGlobal(GeagRmiInterface.class, this);
 			Server server = new Server();
-			server.bind(7779, callHandler);
+			server.bind(7777, callHandler);
 			server.addServerListener(new IServerListener() {
 
 				@Override
@@ -96,8 +98,7 @@ public class GeagRmiServer implements GeagRmiInterface, java.io.Serializable {
 	@Override
 	public String getResponseOfScientificOperation(String data) {
 		Long bStartTime = 0L, bEndTime = 0L;
-		try {		
-			
+		try {
 
 			bStartTime = System.currentTimeMillis();
 			System.out.println("bStartTime: " + bStartTime);
@@ -109,7 +110,6 @@ public class GeagRmiServer implements GeagRmiInterface, java.io.Serializable {
 				sci.exec("K1=int(rand(2000,2000)*10);");
 				sci.exec("K2=int(rand(2000,2000)*10);");
 				sci.exec("inv(inv(inv(inv(inv(inv(inv(inv(inv(inv(K1*K2))))))))));");
-
 
 				sci.close();
 			} else {
@@ -128,6 +128,28 @@ public class GeagRmiServer implements GeagRmiInterface, java.io.Serializable {
 		bEndTime = System.currentTimeMillis();
 		System.out.println((bEndTime - bStartTime) + " ms");
 		return "ss";
+	}
+
+	@Override
+	public String getResponseOfJScienceOperation(double[][] a, double[][] b) {
+		Long bStartTime = 0L, bEndTime = 0L;
+		bStartTime = System.currentTimeMillis();
+
+		String result = "";
+		try {
+
+			JScienceCalculation jScienceCalculation = new JScienceCalculation();
+
+			jScienceCalculation.calculateWithJScience(a, b);
+			bEndTime = System.currentTimeMillis();
+
+			result += (bEndTime - bStartTime);
+			System.out.println(result + " ms");
+
+		} catch (Exception ex) {
+			System.out.println(ex.toString());
+		}
+		return result;
 	}
 
 }
