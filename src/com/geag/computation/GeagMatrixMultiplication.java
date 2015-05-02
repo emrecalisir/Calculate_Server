@@ -1,6 +1,5 @@
 package com.geag.computation;
 
-import java.util.Scanner;
 
 public class GeagMatrixMultiplication {
 

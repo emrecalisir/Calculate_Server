@@ -1,8 +1,8 @@
 package com.geag.javasci;
 
 import org.scilab.modules.javasci.Scilab;
-import org.scilab.modules.types.ScilabType;
 import org.scilab.modules.types.ScilabDouble;
+import org.scilab.modules.types.ScilabType;
 
 public class ScientificCalculator {
 
