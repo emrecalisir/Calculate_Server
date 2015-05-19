@@ -124,8 +124,7 @@ public class GeagRmiOperations extends UnicastRemoteObject implements
 		return result;
 	}
 
-	public String getResponseOfMatriceMultiplicationWithJScience(double[][] a,
-			double[][] b) {
+	public String getResponseOfMatriceMultiplicationWithJScience(double[][] a) {
 		//System.out
 		//		.println("getResponseOfMatriceMultiplicationWithJScience STARTED");
 		bStartTime = System.currentTimeMillis();
@@ -133,7 +132,7 @@ public class GeagRmiOperations extends UnicastRemoteObject implements
 
 			JScienceCalculation jScienceCalculation = new JScienceCalculation();
 
-			result = jScienceCalculation.multiplyMatrices(a, b);
+			result = jScienceCalculation.multiplyMatrices(a, a);
 			bEndTime = System.currentTimeMillis();
 
 			result += ";" + (bEndTime - bStartTime);
