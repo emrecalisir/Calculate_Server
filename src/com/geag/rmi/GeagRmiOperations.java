@@ -1,15 +1,21 @@
 package com.geag.rmi;
 
+import java.io.File;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
+
+import net.sourceforge.tess4j.ITesseract;
+import net.sourceforge.tess4j.Tesseract;
+import net.sourceforge.tess4j.TesseractException;
 
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 import org.scilab.modules.javasci.Scilab;
 
 import com.geag.jscience.JScienceCalculation;
+import com.geag.ocr.Tess;
 import com.geag.opencv.GeagFaceDetector;
 import com.gsu.cloud.calculator.model.RectangleFace;
 
@@ -28,6 +34,8 @@ public class GeagRmiOperations extends UnicastRemoteObject implements
 
 	@Override
 	public String getResponseOfFaceDetection(String data) {
+		System.out.println("getResponseOfFaceDetection STARTED" + data);
+
 		Long bStartTime = 0L, bEndTime = 0L;
 
 		bStartTime = System.currentTimeMillis();
@@ -40,7 +48,6 @@ public class GeagRmiOperations extends UnicastRemoteObject implements
 		String result = "";
 
 		try {
-			System.out.println("getResponse called");
 			listOfFaces = new ArrayList<RectangleFace>();
 			geagFaceDetector = new GeagFaceDetector();
 			faceDetections = geagFaceDetector.detectFaces(data);
@@ -58,13 +65,31 @@ public class GeagRmiOperations extends UnicastRemoteObject implements
 			bEndTime = System.currentTimeMillis();
 			result += (bEndTime - bStartTime);
 
-			System.out.println("Number of faces: " + numberOfFacesDetected
-					+ " in " + (bEndTime - bStartTime) + " ms");
+			System.out
+					.println("getResponseOfFaceDetection COMPLETED. Number of faces: "
+							+ numberOfFacesDetected
+							+ " in "
+							+ (bEndTime - bStartTime) + " ms");
+
 		} catch (Exception ex) {
 			System.out.println(ex);
 		}
 		return result;
 
+	}
+
+	@Override
+	public String getResponseOfOcrDetection(String imageUrl) {
+		System.out.println("getResponseOfOcrDetection STARTED" + imageUrl);
+		Long bStartTime = 0L, bEndTime = 0L;
+		bStartTime = System.currentTimeMillis();
+
+		Tess tess = new Tess();
+		String result = tess.performOcrOperation(imageUrl);
+		bEndTime = System.currentTimeMillis();
+		System.out.println("getResponseOfOcrDetection COMPLETED. Response: "
+				+ result + " in " + (bEndTime - bStartTime) + " ms");
+		return result;
 	}
 
 	public String getResponseOfMatriceMultiplicationWithScilab(String data) {
@@ -125,8 +150,8 @@ public class GeagRmiOperations extends UnicastRemoteObject implements
 	}
 
 	public String getResponseOfMatriceMultiplicationWithJScience(double[][] a) {
-		//System.out
-		//		.println("getResponseOfMatriceMultiplicationWithJScience STARTED");
+		// System.out
+		// .println("getResponseOfMatriceMultiplicationWithJScience STARTED");
 		bStartTime = System.currentTimeMillis();
 		try {
 
@@ -136,13 +161,13 @@ public class GeagRmiOperations extends UnicastRemoteObject implements
 			bEndTime = System.currentTimeMillis();
 
 			result += ";" + (bEndTime - bStartTime);
-			//System.out.println(result + " ms");
+			// System.out.println(result + " ms");
 
 		} catch (Exception ex) {
 			System.out.println(ex.toString());
 		}
-		//System.out
-			//	.println("getResponseOfMatriceMultiplicationWithJScience COMPLETED");
+		// System.out
+		// .println("getResponseOfMatriceMultiplicationWithJScience COMPLETED");
 
 		return result;
 	}

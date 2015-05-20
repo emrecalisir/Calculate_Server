@@ -163,5 +163,9 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="lib/tess4j.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jai_imageio.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jna.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

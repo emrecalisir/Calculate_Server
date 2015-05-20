@@ -8,5 +8,7 @@ public interface GeagRmiInterface {
 	public String getResponseOfPolynomialMultiplicationWithJScience(String coeffs);
 
 	public String getResponseOfMatriceMultiplicationWithJScience(double[][] a);
+	
+	public String getResponseOfOcrDetection(String fileUrl);
 		
 }
