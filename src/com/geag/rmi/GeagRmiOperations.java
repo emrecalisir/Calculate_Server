@@ -1,5 +1,6 @@
 package com.geag.rmi;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -10,6 +11,7 @@ import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 
+import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 import org.scilab.modules.javasci.Scilab;
@@ -17,6 +19,8 @@ import org.scilab.modules.javasci.Scilab;
 import com.geag.jscience.JScienceCalculation;
 import com.geag.ocr.Tess;
 import com.geag.opencv.GeagFaceDetector;
+import com.geag.opencv.GeagOpenCvInitializer;
+import com.geag.util.Util;
 import com.gsu.cloud.calculator.model.RectangleFace;
 
 public class GeagRmiOperations extends UnicastRemoteObject implements
@@ -50,6 +54,9 @@ public class GeagRmiOperations extends UnicastRemoteObject implements
 		try {
 			listOfFaces = new ArrayList<RectangleFace>();
 			geagFaceDetector = new GeagFaceDetector();
+			GeagOpenCvInitializer init = new GeagOpenCvInitializer();
+			init.initOpenCv();
+
 			faceDetections = geagFaceDetector.detectFaces(data);
 
 			numberOfFacesDetected = faceDetections.toArray().length;
@@ -79,14 +86,20 @@ public class GeagRmiOperations extends UnicastRemoteObject implements
 	}
 
 	@Override
-	public String getResponseOfOcrDetection(String imageUrl) {
-		System.out.println("getResponseOfOcrDetection STARTED" + imageUrl);
+	public String getResponseOfOcr(String imageData) {
+		System.out.println("getResponseOfOcrDetection STARTED");
 		Long bStartTime = 0L, bEndTime = 0L;
 		bStartTime = System.currentTimeMillis();
 
+		Util util = new Util();
+		GeagOpenCvInitializer init = new GeagOpenCvInitializer();
+		init.initOpenCv();
+		
+		BufferedImage img = util.convertImageRowDataToBufferedImage(imageData);
 		Tess tess = new Tess();
-		String result = tess.performOcrOperation(imageUrl);
+		String result = tess.performOcrOperationFromBufferedImage(img);
 		bEndTime = System.currentTimeMillis();
+		result += ";" + (bEndTime - bStartTime);
 		System.out.println("getResponseOfOcrDetection COMPLETED. Response: "
 				+ result + " in " + (bEndTime - bStartTime) + " ms");
 		return result;
